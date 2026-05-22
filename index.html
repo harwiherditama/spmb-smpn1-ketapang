@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPMB SMP Negeri 1 Ketapang 2026/2027</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root {
+    --navy: #0f2545;
+    --navy-mid: #1a3a6b;
+    --gold: #c8972a;
+    --gold-light: #e8b84b;
+    --cream: #fdf8f0;
+    --white: #ffffff;
+    --gray-soft: #f4f6fa;
+    --gray-line: #dde3ef;
+    --text: #1c2a3f;
+    --text-muted: #5a6a82;
+    --red: #c0392b;
+    --green: #1a7a4a;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(15,37,69,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    color: var(--white);
+    padding: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(255,255,255,.02) 40px, rgba(255,255,255,.02) 80px);
+  }
+  .header-inner {
+    max-width: 860px; margin: auto;
+    padding: 36px 24px 32px;
+    display: flex; align-items: center; gap: 24px;
+    position: relative;
+  }
+  .header-logo {
+    width: 80px; height: 80px; flex-shrink: 0;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; font-weight: 900;
+    color: var(--navy);
+    box-shadow: 0 0 0 4px rgba(200,151,42,.3);
+  }
+  .header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem; line-height: 1.2;
+  }
+  .header-text p {
+    font-size: .85rem; color: rgba(255,255,255,.7); margin-top: 4px;
+  }
+  .badge-tahun {
+    margin-top: 10px; display: inline-block;
+    background: var(--gold); color: var(--navy);
+    font-weight: 700; font-size: .8rem;
+    padding: 3px 12px; border-radius: 20px;
+    letter-spacing: .5px;
+  }
+
+  /* ─── PROGRESS ─── */
+  .progress-bar-wrap {
+    background: var(--navy);
+    border-top: 1px solid rgba(255,255,255,.1);
+    padding: 0 24px;
+  }
+  .progress-bar-inner {
+    max-width: 860px; margin: auto;
+    display: flex; gap: 0;
+    overflow-x: auto;
+  }
+  .step-tab {
+    padding: 14px 18px;
+    font-size: .78rem; font-weight: 600;
+    color: rgba(255,255,255,.45);
+    border-bottom: 3px solid transparent;
+    cursor: default; white-space: nowrap;
+    transition: all .25s;
+    letter-spacing: .3px;
+  }
+  .step-tab.active { color: var(--gold-light); border-color: var(--gold-light); }
+  .step-tab.done { color: rgba(255,255,255,.7); border-color: rgba(200,151,42,.4); }
+
+  /* ─── MAIN WRAP ─── */
+  .main-wrap {
+    max-width: 860px; margin: 32px auto 60px; padding: 0 16px;
+  }
+
+  /* ─── CARD ─── */
+  .card {
+    background: var(--white); border-radius: 16px;
+    box-shadow: var(--shadow); overflow: hidden;
+    margin-bottom: 24px;
+    border: 1px solid var(--gray-line);
+  }
+  .card-header {
+    background: linear-gradient(90deg, var(--navy) 0%, var(--navy-mid) 100%);
+    padding: 18px 28px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .card-header .icon {
+    width: 36px; height: 36px; background: var(--gold);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+  }
+  .card-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem; color: var(--white);
+  }
+  .card-body { padding: 28px; }
+
+  /* ─── JALUR SELECTOR ─── */
+  .jalur-grid {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+  }
+  .jalur-card {
+    border: 2px solid var(--gray-line); border-radius: var(--radius);
+    padding: 18px 14px; text-align: center; cursor: pointer;
+    transition: all .2s;
+  }
+  .jalur-card:hover { border-color: var(--gold); background: #fffbf2; }
+  .jalur-card.selected { border-color: var(--gold); background: #fffbf2; box-shadow: 0 0 0 4px rgba(200,151,42,.15); }
+  .jalur-card .jalur-icon { font-size: 2rem; margin-bottom: 8px; }
+  .jalur-card .jalur-label { font-weight: 700; font-size: .9rem; color: var(--navy); }
+  .jalur-card .jalur-desc { font-size: .75rem; color: var(--text-muted); margin-top: 4px; }
+
+  /* ─── FORM FIELDS ─── */
+  .fields-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .field-full { grid-column: 1 / -1; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: .82rem; font-weight: 600; color: var(--text); }
+  label .req { color: var(--red); margin-left: 2px; }
+  .hint { font-size: .72rem; color: var(--text-muted); }
+
+  input[type=text], input[type=number], input[type=tel], input[type=date],
+  select, textarea {
+    font-family: 'DM Sans', sans-serif;
+    font-size: .9rem; color: var(--text);
+    padding: 11px 14px;
+    border: 1.5px solid var(--gray-line);
+    border-radius: 8px;
+    background: var(--gray-soft);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(200,151,42,.15);
+    background: #fff;
+  }
+  select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6a82' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+  .radio-group { display: flex; gap: 10px; flex-wrap: wrap; }
+  .radio-item {
+    display: flex; align-items: center; gap: 7px;
+    border: 1.5px solid var(--gray-line); border-radius: 8px;
+    padding: 9px 14px; cursor: pointer; transition: all .2s;
+    font-size: .88rem; font-weight: 500;
+  }
+  .radio-item:hover { border-color: var(--gold); background: #fffbf2; }
+  .radio-item input[type=radio] { accent-color: var(--gold); width: 15px; height: 15px; }
+  .radio-item.selected-radio { border-color: var(--gold); background: #fffbf2; }
+
+  /* ─── UPLOAD BOX ─── */
+  .upload-area {
+    border: 2px dashed var(--gray-line); border-radius: var(--radius);
+    padding: 24px; text-align: center; cursor: pointer;
+    transition: all .2s; background: var(--gray-soft);
+    position: relative;
+  }
+  .upload-area:hover { border-color: var(--gold); background: #fffbf2; }
+  .upload-area input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-area .up-icon { font-size: 1.8rem; margin-bottom: 6px; }
+  .upload-area .up-label { font-size: .85rem; font-weight: 600; color: var(--navy); }
+  .upload-area .up-hint { font-size: .75rem; color: var(--text-muted); margin-top: 3px; }
+  .upload-area .up-filename { margin-top: 8px; font-size: .8rem; color: var(--green); font-weight: 600; display: none; }
+
+  .upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* ─── SECTION DIVIDER ─── */
+  .section-divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 28px 0 20px;
+  }
+  .section-divider span { font-size: .75rem; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .section-divider::before, .section-divider::after { content: ''; flex: 1; height: 1px; background: var(--gray-line); }
+
+  /* ─── ALERT / INFO BOX ─── */
+  .info-box {
+    border-radius: 10px; padding: 14px 18px;
+    font-size: .83rem; line-height: 1.5;
+    display: flex; gap: 10px;
+  }
+  .info-box.blue { background: #eef4ff; border-left: 3px solid #3b82f6; color: #1e40af; }
+  .info-box.gold { background: #fffbf0; border-left: 3px solid var(--gold); color: #7a5a00; }
+
+  /* ─── PERNYATAAN ─── */
+  .pernyataan-box {
+    border: 1.5px solid var(--gray-line); border-radius: var(--radius);
+    padding: 18px 20px; background: var(--gray-soft);
+    font-size: .87rem; line-height: 1.7; color: var(--text);
+  }
+  .checkbox-wrap {
+    display: flex; align-items: flex-start; gap: 10px; margin-top: 14px; cursor: pointer;
+  }
+  .checkbox-wrap input[type=checkbox] { accent-color: var(--gold); width: 17px; height: 17px; margin-top: 3px; flex-shrink: 0; }
+  .checkbox-wrap span { font-size: .85rem; font-weight: 500; }
+
+  /* ─── NAVIGATION BUTTONS ─── */
+  .nav-buttons {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 32px; gap: 12px;
+  }
+  .btn {
+    font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: .9rem;
+    padding: 12px 28px; border-radius: 8px; border: none; cursor: pointer;
+    transition: all .2s; display: inline-flex; align-items: center; gap: 7px;
+  }
+  .btn-prev {
+    background: transparent; color: var(--text-muted);
+    border: 1.5px solid var(--gray-line);
+  }
+  .btn-prev:hover { border-color: var(--navy); color: var(--navy); }
+  .btn-next {
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    color: var(--navy);
+    box-shadow: 0 4px 14px rgba(200,151,42,.35);
+  }
+  .btn-next:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,151,42,.45); }
+  .btn-submit {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+    color: var(--white);
+    box-shadow: 0 4px 14px rgba(15,37,69,.3);
+    padding: 14px 36px; font-size: 1rem;
+  }
+  .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 22px rgba(15,37,69,.4); }
+
+  /* ─── SUCCESS SCREEN ─── */
+  #success-screen {
+    display: none; text-align: center; padding: 60px 24px;
+  }
+  .success-icon {
+    width: 80px; height: 80px; background: #e8f9ef; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; margin: 0 auto 20px;
+  }
+  #success-screen h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--navy); margin-bottom: 10px; }
+  #success-screen p { color: var(--text-muted); font-size: .9rem; max-width: 420px; margin: 0 auto 24px; }
+  .no-reg-box {
+    background: var(--gold); color: var(--navy); border-radius: 10px;
+    padding: 16px 28px; display: inline-block;
+    font-weight: 700; font-size: 1.1rem; letter-spacing: 1px;
+  }
+
+  /* ─── RESPONSIVE ─── */
+  @media (max-width: 600px) {
+    .fields-grid { grid-template-columns: 1fr; }
+    .jalur-grid { grid-template-columns: 1fr; }
+    .upload-grid { grid-template-columns: 1fr; }
+    .header-inner { flex-direction: column; text-align: center; }
+    .header-text h1 { font-size: 1.3rem; }
+    .card-body { padding: 18px; }
+  }
+
+  /* ─── STEP PAGES ─── */
+  .step-page { display: none; animation: fadeUp .3s ease; }
+  .step-page.active { display: block; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(16px); } to { opacity:1; transform:none; } }
+
+  /* ─── CONDITIONAL SECTIONS ─── */
+  .conditional { display: none; }
+  .conditional.show { display: block; }
+
+  /* ─── MAP (Jalur Domisili) ─── */
+  .map-sekolah-info {
+    background: rgba(15,37,69,0.06);
+    border: 1.5px solid var(--gray-line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .map-sekolah-info .msi-label { font-size: .72rem; font-weight: 700; color: var(--gold); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
+  .map-sekolah-info .msi-name { font-size: .95rem; font-weight: 700; color: var(--navy); }
+  .map-sekolah-info .msi-addr { font-size: .8rem; color: var(--text-muted); margin-top: 3px; }
+  .map-sekolah-info .msi-coord { font-size: .75rem; color: var(--text-muted); font-family: monospace; margin-top: 4px; opacity: .7; }
+  .map-zona-info {
+    background: var(--gray-soft);
+    border: 1.5px solid var(--gray-line);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: .8rem;
+    line-height: 2;
+    color: var(--text);
+  }
+  .map-zona-info .mzi-title { font-size: .72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
+  #spmb-map { width: 100%; height: 380px; border-radius: var(--radius); border: 1.5px solid var(--gray-line); cursor: crosshair; margin-bottom: 12px; }
+  .map-hint-text { font-size: .78rem; color: var(--text-muted); margin-bottom: 8px; }
+  .distance-result {
+    display: none;
+    background: var(--gray-soft);
+    border: 1.5px solid var(--gray-line);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-top: 4px;
+    align-items: center;
+    gap: 16px;
+  }
+  .distance-result.show { display: flex; }
+  .dr-icon { width: 42px; height: 42px; background: var(--navy); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+  .dr-label { font-size: .75rem; color: var(--text-muted); }
+  .dr-value { font-size: 1.4rem; font-weight: 800; color: var(--navy); font-family: monospace; }
+  .dr-zone { margin-left: auto; padding: 5px 14px; border-radius: 999px; font-size: .78rem; font-weight: 700; }
+  .zone-dekat  { background: #e6f9f0; color: #1a7a4a; border: 1px solid #a3e6c5; }
+  .zone-sedang { background: #fff8e6; color: #92620a; border: 1px solid #f5d98a; }
+  .zone-jauh   { background: #fdf0f0; color: var(--red);  border: 1px solid #f5b8b8; }
+  .coords-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .coord-chip { flex: 1; min-width: 100px; background: var(--white); border: 1.5px solid var(--gray-line); border-radius: 8px; padding: 8px 12px; font-size: .75rem; }
+  .coord-chip .cc-label { color: var(--text-muted); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+  .coord-chip .cc-val { color: var(--navy); font-family: monospace; font-weight: 600; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-logo">N1</div>
+    <div class="header-text">
+      <h1>Sistem Penerimaan Murid Baru</h1>
+      <p>SMP Negeri 1 Ketapang &bull; Kabupaten Ketapang</p>
+      <span class="badge-tahun">Tahun Ajaran 2026/2027</span>
+    </div>
+  </div>
+</header>
+
+<!-- PROGRESS TABS -->
+<div class="progress-bar-wrap">
+  <div class="progress-bar-inner">
+    <div class="step-tab active" id="tab-0">① Pilih Jalur &amp; Upload</div>
+    <div class="step-tab" id="tab-1">② Data Diri</div>
+    <div class="step-tab" id="tab-2">③ Data Ayah</div>
+    <div class="step-tab" id="tab-3">④ Data Ibu</div>
+    <div class="step-tab" id="tab-4">⑤ Data Wali</div>
+    <div class="step-tab" id="tab-5">⑥ Pernyataan &amp; Kirim</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-wrap">
+
+<!-- ═══════════════════════════════════ STEP 0: JALUR + UPLOAD ═══════════════════════════════════ -->
+<div class="step-page active" id="step-0">
+
+  <!-- JALUR -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">🛤️</div>
+      <h2>Pilih Jalur Pendaftaran</h2>
+    </div>
+    <div class="card-body">
+      <div class="info-box gold" style="margin-bottom:20px;">
+        ℹ️ Pilih satu jalur pendaftaran yang sesuai dengan kondisi calon peserta didik. Setiap jalur memiliki persyaratan dokumen yang berbeda.
+      </div>
+      <div class="jalur-grid">
+        <div class="jalur-card" onclick="pilihJalur('domisili', this)">
+          <div class="jalur-icon">🏠</div>
+          <div class="jalur-label">Domisili</div>
+          <div class="jalur-desc">Berdasarkan alamat tempat tinggal sesuai KK / domisili</div>
+        </div>
+        <div class="jalur-card" onclick="pilihJalur('afirmasi', this)">
+          <div class="jalur-icon">🤝</div>
+          <div class="jalur-label">Afirmasi</div>
+          <div class="jalur-desc">Penerima PKH / PIP (Program Indonesia Pintar)</div>
+        </div>
+        <div class="jalur-card" onclick="pilihJalur('mutasi', this)">
+          <div class="jalur-icon">📋</div>
+          <div class="jalur-label">Mutasi</div>
+          <div class="jalur-desc">Mengikuti pindah tugas orang tua / wali</div>
+        </div>
+        <div class="jalur-card" onclick="pilihJalur('prestasi', this)">
+          <div class="jalur-icon">🏆</div>
+          <div class="jalur-label">Prestasi</div>
+          <div class="jalur-desc">Berdasarkan rapor, sertifikat TKA, kepanduan, atau prestasi akademik/non-akademik</div>
+        </div>
+      </div>
+
+      <!-- DOMISILI EXTRA -->
+      <div id="domisili-section" class="conditional" style="margin-top:24px;">
+        <div class="section-divider"><span>Informasi Domisili</span></div>
+        <div class="fields-grid">
+          <div class="field field-full">
+            <label>Pilih Alamat yang Dipakai Calon Peserta Didik Saat Mendaftar <span class="req">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item"><input type="radio" name="jenis_alamat" value="kk"> Kartu Keluarga</label>
+              <label class="radio-item"><input type="radio" name="jenis_alamat" value="domisili"> Domisili</label>
+            </div>
+          </div>
+          <div class="field field-full">
+            <label>Alamat Lengkap <span class="req">*</span></label>
+            <input type="text" placeholder="Nama Jalan, Gang, Nomor Rumah, RT/RW, Nama Dusun">
+          </div>
+          <div class="field">
+            <label>Nama Kelurahan <span class="req">*</span></label>
+            <select>
+              <option value="">— Pilih Kelurahan —</option>
+              <option>Tengah</option>
+              <option>Kantor</option>
+              <option>Sampit</option>
+              <option>Mulia Baru</option>
+              <option>Lainnya</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nama Kecamatan <span class="req">*</span></label>
+            <input type="text" placeholder="Kecamatan">
+          </div>
+          <div class="field">
+            <label>Nama Kabupaten <span class="req">*</span></label>
+            <input type="text" value="Ketapang">
+          </div>
+          <div class="field">
+            <label>Kode Pos <span class="req">*</span></label>
+            <input type="text" placeholder="78800" maxlength="5">
+          </div>
+          <div class="field">
+            <label>Tempat Tinggal <span class="req">*</span></label>
+            <select>
+              <option value="">— Pilih —</option>
+              <option>Bersama orangtua</option>
+              <option>Wali</option>
+              <option>Kost</option>
+              <option>Asrama</option>
+              <option>Panti asuhan</option>
+              <option>Pesantren</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Moda Transportasi <span class="req">*</span></label>
+            <select>
+              <option value="">— Pilih —</option>
+              <option>Jalan kaki</option>
+              <option>Sepeda</option>
+              <option>Sepeda motor</option>
+              <option>Antar/jemput motor</option>
+              <option>Antar/jemput mobil</option>
+              <option>Kendaraan umum</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Anak Ke- <span class="req">*</span></label>
+            <select>
+              <option value="">— Pilih —</option>
+              <option>1</option><option>2</option><option>3</option>
+              <option>4</option><option>5</option><option>6</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- PETA LOKASI DOMISILI -->
+        <div class="section-divider" style="margin-top:24px;"><span>Peta Lokasi Rumah</span></div>
+
+        <div class="map-sekolah-info">
+          <div class="msi-label">📍 Sekolah Tujuan</div>
+          <div class="msi-name">SMP Negeri 1 Ketapang</div>
+          <div class="msi-addr">Jl. RM Sudiono No.42, Kel. Tengah<br>Kec. Delta Pawan, Kab. Ketapang, Kalbar 78812</div>
+          <div class="msi-coord">-1.844700, 109.976300</div>
+        </div>
+
+        <div class="map-zona-info">
+          <div class="mzi-title">📊 Zona Jarak</div>
+          <span style="color:#1a7a4a;font-weight:700;">●</span> <b>Dekat</b> — 0 hingga 1.000 meter<br>
+          <span style="color:#92620a;font-weight:700;">●</span> <b>Sedang</b> — 1.001 hingga 2.000 meter<br>
+          <span style="color:#c0392b;font-weight:700;">●</span> <b>Jauh</b> — lebih dari 2.001 meter
+        </div>
+
+        <div class="card-header" style="border-radius:var(--radius) var(--radius) 0 0; margin-bottom:0; padding:12px 16px; background:linear-gradient(90deg,var(--navy),var(--navy-mid));">
+          <div class="icon" style="width:28px;height:28px;font-size:.85rem;">🗺️</div>
+          <h2 style="font-size:.95rem;">Peta Lokasi — Klik untuk Menentukan Titik Rumah</h2>
+        </div>
+        <p class="map-hint-text" style="margin-top:10px;">🔴 SMP Negeri 1 Ketapang (bisa digeser) &nbsp;|&nbsp; 🏠 Titik rumah pendaftar (klik peta)</p>
+        <div id="spmb-map"></div>
+
+        <div class="distance-result" id="spmb-distance-box">
+          <div class="dr-icon">📏</div>
+          <div>
+            <div class="dr-label">Jarak ke SMP Negeri 1 Ketapang</div>
+            <div class="dr-value" id="spmb-dist-val">—</div>
+          </div>
+          <div class="dr-zone" id="spmb-dist-zone">—</div>
+        </div>
+        <div class="coords-chips" id="spmb-coords-chips" style="display:none;">
+          <div class="coord-chip"><div class="cc-label">Latitude Rumah</div><div class="cc-val" id="spmb-coord-lat">—</div></div>
+          <div class="coord-chip"><div class="cc-label">Longitude Rumah</div><div class="cc-val" id="spmb-coord-lng">—</div></div>
+          <div class="coord-chip"><div class="cc-label">Jarak Lurus</div><div class="cc-val" id="spmb-coord-dist">—</div></div>
+        </div>
+      </div><!-- /#domisili-section -->
+
+      <!-- MUTASI EXTRA -->
+      <div id="mutasi-section" class="conditional" style="margin-top:24px;">
+        <div class="section-divider"><span>Informasi Mutasi</span></div>
+        <div class="fields-grid">
+          <div class="field field-full">
+            <label>Nama Lembaga / Instansi / Perusahaan yang Mengeluarkan Surat <span class="req">*</span></label>
+            <input type="text" placeholder="Nama instansi">
+          </div>
+          <div class="field">
+            <label>Nomor Surat <span class="req">*</span></label>
+            <input type="text" placeholder="No. surat pindah tugas">
+          </div>
+        </div>
+      </div>
+
+      <!-- AFIRMASI EXTRA -->
+      <div id="afirmasi-section" class="conditional" style="margin-top:24px;">
+        <div class="section-divider"><span>Informasi Afirmasi</span></div>
+        <div class="field">
+          <label>Jenis Kesejahteraan <span class="req">*</span></label>
+          <select>
+            <option value="">— Pilih Program —</option>
+            <option>PROGRAM KELUARGA HARAPAN (PKH)</option>
+            <option>PROGRAM INDONESIA PINTAR (PIP)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- PRESTASI EXTRA -->
+      <div id="prestasi-section" class="conditional" style="margin-top:24px;">
+        <div class="section-divider"><span>Jalur Prestasi</span></div>
+        <div class="info-box gold" style="margin-bottom:20px;">
+          🏆 Lengkapi minimal <strong>satu</strong> dari empat kategori prestasi berikut: Rapor, Sertifikat TKA, Kepanduan Organisasi, atau Sertifikat Prestasi Akademik/Non-Akademik.
+        </div>
+
+        <!-- A. RAPOR -->
+        <div class="section-divider"><span>A. Prestasi Rapor</span></div>
+        <div class="field" style="margin-bottom:14px;">
+          <label>A.1. Ada Prestasi Rapor? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="ada_rapor" value="ada" onchange="togglePrestasi('rapor','ada')"> Ada</label>
+            <label class="radio-item"><input type="radio" name="ada_rapor" value="tidak" onchange="togglePrestasi('rapor','tidak')"> Tidak</label>
+          </div>
+        </div>
+        <div id="data-rapor" class="conditional">
+          <div class="fields-grid">
+            <div class="field field-full">
+              <label>Asal Sekolah <span class="req">*</span></label>
+              <input type="text" placeholder="Nama SD / MI asal">
+            </div>
+            <div class="field">
+              <label>Peringkat <span class="req">*</span></label>
+              <select>
+                <option value="">— Pilih Peringkat —</option>
+                <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Nilai Bahasa Indonesia <span class="req">*</span></label>
+              <input type="number" placeholder="0 – 100" min="0" max="100" step="1" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+              <span class="hint">Bilangan bulat, rentang 0–100</span>
+            </div>
+            <div class="field">
+              <label>Nilai Matematika <span class="req">*</span></label>
+              <input type="number" placeholder="0 – 100" min="0" max="100" step="1" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+              <span class="hint">Bilangan bulat, rentang 0–100</span>
+            </div>
+            <div class="field">
+              <label>Nilai IPA <span class="req">*</span></label>
+              <input type="number" placeholder="0 – 100" min="0" max="100" step="1" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+              <span class="hint">Bilangan bulat, rentang 0–100</span>
+            </div>
+            <div class="field">
+              <label>Nilai Rata-Rata Rapor <span class="req">*</span></label>
+              <input type="number" placeholder="0 – 100" min="0" max="100" step="1" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+              <span class="hint">Bilangan bulat, rentang 0–100</span>
+            </div>
+            <div class="field field-full">
+              <label>Upload Surat Keterangan Peringkat <span class="req">*</span></label>
+              <div class="upload-area">
+                <input id="file_peringkat" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+                <div class="up-icon">📋</div>
+                <div class="up-label">Klik untuk upload</div>
+                <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div>
+                <div class="up-filename"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- B. SERTIFIKAT TKA -->
+        <div class="section-divider" style="margin-top:24px;"><span>B. Sertifikat TKA</span></div>
+        <div class="field" style="margin-bottom:14px;">
+          <label>B.1. Ada Sertifikat TKA? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="ada_tka" value="ada" onchange="togglePrestasi('tka','ada')"> Ada</label>
+            <label class="radio-item"><input type="radio" name="ada_tka" value="tidak" onchange="togglePrestasi('tka','tidak')"> Tidak</label>
+          </div>
+        </div>
+        <div id="data-tka" class="conditional">
+          <div class="fields-grid">
+            <div class="field">
+              <label>Nilai Matematika TKA <span class="req">*</span></label>
+              <input type="number" placeholder="0 – 100" min="0" max="100" step="1" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            </div>
+            <div class="field">
+              <label>Nilai Bahasa Indonesia TKA <span class="req">*</span></label>
+              <input type="number" placeholder="0 – 100" min="0" max="100" step="1" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            </div>
+            <div class="field field-full">
+              <label>Upload Sertifikat TKA <span class="req">*</span></label>
+              <div class="upload-area">
+                <input id="file_tka" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+                <div class="up-icon">📜</div>
+                <div class="up-label">Klik untuk upload</div>
+                <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div>
+                <div class="up-filename"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- C. KEPANDUAN ORGANISASI -->
+        <div class="section-divider" style="margin-top:24px;"><span>C. Kepanduan Organisasi</span></div>
+        <div class="field" style="margin-bottom:14px;">
+          <label>C.1. Ada Kepanduan Organisasi? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="ada_kepanduan" value="ada" onchange="togglePrestasi('kepanduan','ada')"> Ada</label>
+            <label class="radio-item"><input type="radio" name="ada_kepanduan" value="tidak" onchange="togglePrestasi('kepanduan','tidak')"> Tidak</label>
+          </div>
+        </div>
+        <div id="data-kepanduan" class="conditional">
+          <div class="field">
+            <label>Upload Bukti Kepanduan Organisasi <span class="req">*</span></label>
+            <div class="upload-area">
+              <input id="file_kepanduan" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+              <div class="up-icon">⚜️</div>
+              <div class="up-label">Klik untuk upload</div>
+              <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div>
+              <div class="up-filename"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- D. PRESTASI AKADEMIK -->
+        <div class="section-divider" style="margin-top:24px;"><span>D. Prestasi Akademik</span></div>
+        <div class="field" style="margin-bottom:14px;">
+          <label>D.1. Ada Prestasi Akademik? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="ada_akademik" value="ada" onchange="togglePrestasi('akademik','ada')"> Ada</label>
+            <label class="radio-item"><input type="radio" name="ada_akademik" value="tidak" onchange="togglePrestasi('akademik','tidak')"> Tidak</label>
+          </div>
+        </div>
+        <div id="data-akademik" class="conditional">
+          <div id="akademik-entries">
+            <!-- Entry pertama -->
+            <div class="akademik-entry" style="border:1.5px solid var(--gray-line);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+              <div style="font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:14px;">Prestasi Akademik #1</div>
+              <div class="fields-grid">
+                <div class="field">
+                  <label>Tingkat Kejuaraan/Perlombaan <span class="req">*</span></label>
+                  <select>
+                    <option value="">— Pilih Tingkat —</option>
+                    <option>INTERNASIONAL</option>
+                    <option>NASIONAL</option>
+                    <option>REGIONAL/WILAYAH</option>
+                    <option>PROVINSI</option>
+                    <option>KABUPATEN</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Nama Kejuaraan/Lomba <span class="req">*</span></label>
+                  <select>
+                    <option value="">— Pilih Nama —</option>
+                    <option>OSN</option>
+                    <option>LPIR</option>
+                    <option>OPSI</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Jenis Kejuaraan/Perlombaan <span class="req">*</span></label>
+                  <select>
+                    <option value="">— Pilih Jenis —</option>
+                    <option>PERORANGAN</option>
+                    <option>BEREGU (2 s.d. 11)</option>
+                    <option>MASSAL (12 Orang atau lebih)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Kejuaraan yang Diraih <span class="req">*</span></label>
+                  <select>
+                    <option value="">— Pilih Juara —</option>
+                    <option>Juara 1</option>
+                    <option>Juara 2</option>
+                    <option>Juara 3</option>
+                  </select>
+                </div>
+                <div class="field field-full">
+                  <label>Upload Bukti Kejuaraan <span class="req">*</span></label>
+                  <div class="upload-area">
+                    <input id="file_akademik_1" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+                    <div class="up-icon">🥇</div>
+                    <div class="up-label">Klik untuk upload</div>
+                    <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div>
+                    <div class="up-filename"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+            <button type="button" class="btn btn-next" style="font-size:.82rem;padding:9px 18px;" onclick="tambahAkademik()">+ Tambah Prestasi Akademik</button>
+            <button type="button" id="hapus-akademik-btn" class="btn btn-prev" style="font-size:.82rem;padding:9px 18px;display:none;" onclick="hapusAkademik()">− Hapus Terakhir</button>
+          </div>
+        </div>
+
+        <!-- E. PRESTASI NON-AKADEMIK -->
+        <div class="section-divider" style="margin-top:24px;"><span>E. Prestasi Non-Akademik</span></div>
+        <div class="field" style="margin-bottom:14px;">
+          <label>E.1. Ada Prestasi Non-Akademik? <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="ada_nonakademik" value="ada" onchange="togglePrestasi('nonakademik','ada')"> Ada</label>
+            <label class="radio-item"><input type="radio" name="ada_nonakademik" value="tidak" onchange="togglePrestasi('nonakademik','tidak')"> Tidak</label>
+          </div>
+        </div>
+        <div id="data-nonakademik" class="conditional">
+          <div id="nonakademik-entries">
+            <!-- Entry pertama -->
+            <div class="nonakademik-entry" style="border:1.5px solid var(--gray-line);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+              <div style="font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:14px;">Prestasi Non-Akademik #1</div>
+              <div class="fields-grid">
+                <div class="field">
+                  <label>Tingkat Kejuaraan/Perlombaan <span class="req">*</span></label>
+                  <select>
+                    <option value="">— Pilih Tingkat —</option>
+                    <option>INTERNASIONAL</option>
+                    <option>NASIONAL</option>
+                    <option>REGIONAL/WILAYAH</option>
+                    <option>PROVINSI</option>
+                    <option>KABUPATEN</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Nama Kejuaraan/Lomba <span class="req">*</span></label>
+                  <select>
+                    <option value="">— Pilih Nama —</option>
+                    <option>OSN</option>
+                    <option>LPIR</option>
+                    <option>OPSI</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Jenis Kejuaraan/Perlombaan <span class="req">*</span></label>
+                  <select>
+                    <option value="">— Pilih Jenis —</option>
+                    <option>PERORANGAN</option>
+                    <option>BEREGU (2 s.d. 11)</option>
+                    <option>MASSAL (12 Orang atau lebih)</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label>Kejuaraan yang Diraih <span class="req">*</span></label>
+                  <select>
+                    <option value="">— Pilih Juara —</option>
+                    <option>Juara 1</option>
+                    <option>Juara 2</option>
+                    <option>Juara 3</option>
+                  </select>
+                </div>
+                <div class="field field-full">
+                  <label>Upload Bukti Kejuaraan <span class="req">*</span></label>
+                  <div class="upload-area">
+                    <input id="file_nonakademik_1" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+                    <div class="up-icon">🏅</div>
+                    <div class="up-label">Klik untuk upload</div>
+                    <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div>
+                    <div class="up-filename"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:4px;">
+            <button type="button" class="btn btn-next" style="font-size:.82rem;padding:9px 18px;" onclick="tambahNonAkademik()">+ Tambah Prestasi Non-Akademik</button>
+            <button type="button" id="hapus-nonakademik-btn" class="btn btn-prev" style="font-size:.82rem;padding:9px 18px;display:none;" onclick="hapusNonAkademik()">− Hapus Terakhir</button>
+          </div>
+        </div>
+
+      </div><!-- end #prestasi-section -->
+    </div>
+  </div>
+
+  <!-- UPLOAD DOKUMEN WAJIB -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">📎</div>
+      <h2>Upload Dokumen</h2>
+    </div>
+    <div class="card-body">
+      <div class="info-box blue" style="margin-bottom:20px;">
+        📌 Upload semua dokumen dalam format JPG, PNG, atau PDF. Maksimal ukuran file 2 MB per dokumen.
+      </div>
+      <div class="upload-grid">
+        <div class="field">
+          <label>Kartu Keluarga (KK) <span class="req">*</span></label>
+          <div class="upload-area">
+            <input id="file_kk" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+            <div class="up-icon">🗂️</div>
+            <div class="up-label">Klik untuk upload</div>
+            <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div>
+            <div class="up-filename"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Akta Kelahiran <span class="req">*</span></label>
+          <div class="upload-area">
+            <input id="file_akta" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+            <div class="up-icon">📄</div>
+            <div class="up-label">Klik untuk upload</div>
+            <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div>
+            <div class="up-filename"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Ijazah SD <span class="req">*</span></label>
+          <div class="upload-area">
+            <input id="file_ijazah" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+            <div class="up-icon">🎓</div>
+            <div class="up-label">Klik untuk upload</div>
+            <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div>
+            <div class="up-filename"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Pas Photo Terbaru Berseragam SD <span class="req">*</span></label>
+          <div class="upload-area">
+            <input id="file_foto" type="file" accept=".jpg,.jpeg,.png" onchange="showFile(this)">
+            <div class="up-icon">🖼️</div>
+            <div class="up-label">Klik untuk upload</div>
+            <div class="up-hint">JPG / PNG, maks 2 MB (background bebas)</div>
+            <div class="up-filename"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONDITIONAL UPLOADS -->
+      <div id="upload-domisili" class="conditional" style="margin-top:16px;">
+        <div class="field">
+          <label>Surat Keterangan Domisili <span class="req">*</span></label>
+          <div class="upload-area">
+            <input id="file_domisili" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+            <div class="up-icon">🏡</div>
+            <div class="up-label">Klik untuk upload</div>
+            <div class="up-hint">Wajib bagi yang mendaftar via jalur domisili</div>
+            <div class="up-filename"></div>
+          </div>
+        </div>
+      </div>
+      <div id="upload-mutasi" class="conditional" style="margin-top:16px;">
+        <div class="field">
+          <label>Surat Pindah Tugas (Mutasi) <span class="req">*</span></label>
+          <div class="upload-area">
+            <input id="file_mutasi" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+            <div class="up-icon">📋</div>
+            <div class="up-label">Klik untuk upload</div>
+            <div class="up-hint">Surat pindah tugas dari instansi/perusahaan</div>
+            <div class="up-filename"></div>
+          </div>
+        </div>
+      </div>
+      <div id="upload-afirmasi" class="conditional" style="margin-top:16px;">
+        <div class="field">
+          <label>Buku Rekening PIP / Kartu PIP / PKH <span class="req">*</span></label>
+          <div class="upload-area">
+            <input id="file_afirmasi" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+            <div class="up-icon">💳</div>
+            <div class="up-label">Klik untuk upload</div>
+            <div class="up-hint">Buku rekening atau kartu program afirmasi</div>
+            <div class="up-filename"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Prestasi: tidak ada upload wajib tambahan di sini karena upload ada di masing-masing sub-seksi -->
+      <div id="upload-prestasi" class="conditional" style="margin-top:16px;">
+        <div class="info-box blue">
+          📎 Upload bukti prestasi dilakukan di masing-masing kategori di atas (Rapor, TKA, Kepanduan, dan Kejuaraan).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <span></span>
+    <button class="btn btn-next" onclick="goStep(1)">Lanjut: Data Diri →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ STEP 1: DATA DIRI ═══════════════════════════════════ -->
+<div class="step-page" id="step-1">
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">👤</div>
+      <h2>Data Diri Calon Peserta Didik</h2>
+    </div>
+    <div class="card-body">
+      <div class="fields-grid">
+
+        <div class="field field-full">
+          <label>Nama Lengkap <span class="req">*</span></label>
+          <input id="f_nama" type="text" placeholder="NAMA LENGKAP (HURUF KAPITAL)" style="text-transform:uppercase">
+          <span class="hint">Tulis nama sesuai akta kelahiran, gunakan huruf kapital semua</span>
+        </div>
+
+        <div class="field">
+          <label>Jenis Kelamin <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="jk" value="Laki-laki"> Laki-laki</label>
+            <label class="radio-item"><input type="radio" name="jk" value="Perempuan"> Perempuan</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>NISN <span class="req">*</span></label>
+          <input id="f_nisn" type="text" placeholder="0000000000" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')">
+          <span class="hint">Nomor Induk Siswa Nasional (10 digit)</span>
+        </div>
+
+        <div class="field">
+          <label>Nomor Kartu Keluarga <span class="req">*</span></label>
+          <input id="f_no_kk" type="text" placeholder="3400000000000000" maxlength="16" oninput="this.value=this.value.replace(/\D/g,'')">
+          <span class="hint">16 digit sesuai KK</span>
+        </div>
+
+        <div class="field">
+          <label>NIK Peserta Didik <span class="req">*</span></label>
+          <input id="f_nik" type="text" placeholder="3400000000000000" maxlength="16" oninput="this.value=this.value.replace(/\D/g,'')">
+          <span class="hint">16 digit sesuai KTP/KK</span>
+        </div>
+
+        <div class="field">
+          <label>Tempat Lahir <span class="req">*</span></label>
+          <input id="f_tempat_lahir" type="text" placeholder="Kota / Kabupaten tempat lahir">
+        </div>
+
+        <div class="field">
+          <label>Tanggal Lahir <span class="req">*</span></label>
+          <input id="f_tgl_lahir" type="date">
+        </div>
+
+        <div class="field">
+          <label>Nomor WhatsApp <span class="req">*</span></label>
+          <input id="f_wa" type="tel" placeholder="08xxxxxxxxxx" oninput="this.value=this.value.replace(/[^0-9+]/g,'')">
+        </div>
+
+        <div class="field">
+          <label>Agama dan Kepercayaan <span class="req">*</span></label>
+          <select id="f_agama">
+            <option value="">— Pilih Agama —</option>
+            <option>Islam</option>
+            <option>Kristen</option>
+            <option>Katholik</option>
+            <option>Hindu</option>
+            <option>Buddha</option>
+            <option>Khonghucu</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Hobi</label>
+          <input id="f_hobi" type="text" placeholder="Contoh: Membaca, Olahraga, Melukis">
+        </div>
+
+        <div class="field">
+          <label>Cita-Cita</label>
+          <input id="f_cita" type="text" placeholder="Contoh: Dokter, Guru, Insinyur">
+        </div>
+
+        <div class="field">
+          <label>Pendidikan Pra-Sekolah <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="pra_sekolah" value="Ya"> Ya</label>
+            <label class="radio-item"><input type="radio" name="pra_sekolah" value="Tidak"> Tidak</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Tinggi Badan (meter) <span class="req">*</span></label>
+          <input id="f_tinggi" type="number" placeholder="1.50" step="0.01" min="1" max="2.5">
+        </div>
+
+        <div class="field">
+          <label>Berat Badan (kg) <span class="req">*</span></label>
+          <input id="f_berat" type="number" placeholder="45" min="10" max="200">
+        </div>
+
+        <div class="field">
+          <label>Jarak Tempat Tinggal ke Sekolah <span class="req">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item"><input type="radio" name="jarak_rmh" value="Kurang dari 1 km"> Kurang dari 1 km</label>
+            <label class="radio-item"><input type="radio" name="jarak_rmh" value="Lebih dari 1 km"> Lebih dari 1 km</label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Waktu Tempuh ke Sekolah (menit) <span class="req">*</span></label>
+          <input id="f_waktu_tempuh" type="number" placeholder="15" min="1" max="300">
+        </div>
+
+        <div class="field">
+          <label>Jumlah Saudara Kandung <span class="req">*</span></label>
+          <input id="f_jml_saudara" type="number" placeholder="0" min="0" max="20">
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="btn btn-prev" onclick="goStep(0)">← Kembali</button>
+    <button class="btn btn-next" onclick="goStep(2)">Lanjut: Data Ayah →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ STEP 2: DATA AYAH ═══════════════════════════════════ -->
+<div class="step-page" id="step-2">
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">👨</div>
+      <h2>Data Ayah</h2>
+    </div>
+    <div class="card-body">
+
+      <div class="field" style="margin-bottom:20px;">
+        <label>B.1. Keadaan Ayah Kandung <span class="req">*</span></label>
+        <div class="radio-group">
+          <label class="radio-item"><input type="radio" name="ayah_status" value="hidup" onchange="toggleKondisi('ayah','hidup')"> Hidup</label>
+          <label class="radio-item"><input type="radio" name="ayah_status" value="meninggal" onchange="toggleKondisi('ayah','meninggal')"> Meninggal</label>
+        </div>
+      </div>
+
+      <div id="data-ayah-kandung" class="conditional">
+        <div class="section-divider"><span>Data Ayah Kandung</span></div>
+        <div class="fields-grid">
+          <div class="field field-full">
+            <label>Nama Ayah Kandung <span class="req">*</span></label>
+            <input id="f_ayah_nama" type="text" placeholder="Nama lengkap ayah kandung">
+          </div>
+          <div class="field">
+            <label>NIK Ayah Kandung <span class="req">*</span></label>
+            <input id="f_ayah_nik" type="text" placeholder="3400000000000000" maxlength="16" oninput="this.value=this.value.replace(/\D/g,'')">
+          </div>
+          <div class="field">
+            <label>Tahun Lahir Ayah <span class="req">*</span></label>
+            <input id="f_ayah_thn_lahir" type="text" placeholder="1980" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')">
+          </div>
+          <div class="field">
+            <label>Pendidikan Ayah <span class="req">*</span></label>
+            <select id="f_ayah_pendidikan">
+              <option value="">— Pilih Pendidikan —</option>
+              <option>TIDAK/BELUM SEKOLAH</option>
+              <option>TIDAK TAMAT SD</option>
+              <option>SD/SEDERAJAT</option>
+              <option>SMP/SEDERAJAT</option>
+              <option>SMA/SEDERAJAT</option>
+              <option>D-1</option><option>D-2</option><option>D-3</option>
+              <option>D-4/S-1</option><option>S-2</option><option>S-3</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Pekerjaan Ayah <span class="req">*</span></label>
+            <input id="f_ayah_pekerjaan" type="text" placeholder="Contoh: Petani, PNS, Wiraswasta">
+          </div>
+          <div class="field">
+            <label>Penghasilan Ayah <span class="req">*</span></label>
+            <select id="f_ayah_penghasilan">
+              <option value="">— Pilih Rentang Penghasilan —</option>
+              <option>TIDAK BERPENGHASILAN</option>
+              <option>KURANG DARI 500.000</option>
+              <option>500.000 – 999.000</option>
+              <option>1.000.000 – 1.999.999</option>
+              <option>2.000.000 – 4.999.999</option>
+              <option>5.000.000 – 20.000.000</option>
+              <option>LEBIH DARI 20.000.000</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nomor WA Ayah</label>
+            <input id="f_ayah_wa" type="tel" placeholder="08xxxxxxxxxx">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="btn btn-prev" onclick="goStep(1)">← Kembali</button>
+    <button class="btn btn-next" onclick="goStep(3)">Lanjut: Data Ibu →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ STEP 3: DATA IBU ═══════════════════════════════════ -->
+<div class="step-page" id="step-3">
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">👩</div>
+      <h2>Data Ibu</h2>
+    </div>
+    <div class="card-body">
+
+      <div class="field" style="margin-bottom:20px;">
+        <label>D.1. Keadaan Ibu Kandung <span class="req">*</span></label>
+        <div class="radio-group">
+          <label class="radio-item"><input type="radio" name="ibu_status" value="hidup" onchange="toggleKondisi('ibu','hidup')"> Hidup</label>
+          <label class="radio-item"><input type="radio" name="ibu_status" value="meninggal" onchange="toggleKondisi('ibu','meninggal')"> Meninggal</label>
+        </div>
+      </div>
+
+      <div id="data-ibu-kandung" class="conditional">
+        <div class="section-divider"><span>Data Ibu Kandung</span></div>
+        <div class="fields-grid">
+          <div class="field field-full">
+            <label>Nama Ibu Kandung <span class="req">*</span></label>
+            <input id="f_ibu_nama" type="text" placeholder="Nama lengkap ibu kandung">
+          </div>
+          <div class="field">
+            <label>NIK Ibu Kandung <span class="req">*</span></label>
+            <input id="f_ibu_nik" type="text" placeholder="3400000000000000" maxlength="16" oninput="this.value=this.value.replace(/\D/g,'')">
+          </div>
+          <div class="field">
+            <label>Tahun Lahir Ibu <span class="req">*</span></label>
+            <input id="f_ibu_thn_lahir" type="text" placeholder="1983" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')">
+          </div>
+          <div class="field">
+            <label>Pendidikan Ibu <span class="req">*</span></label>
+            <select id="f_ibu_pendidikan">
+              <option value="">— Pilih Pendidikan —</option>
+              <option>TIDAK/BELUM SEKOLAH</option>
+              <option>TIDAK TAMAT SD</option>
+              <option>SD/SEDERAJAT</option>
+              <option>SMP/SEDERAJAT</option>
+              <option>SMA/SEDERAJAT</option>
+              <option>D-1</option><option>D-2</option><option>D-3</option>
+              <option>D-4/S-1</option><option>S-2</option><option>S-3</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Pekerjaan Ibu <span class="req">*</span></label>
+            <input id="f_ibu_pekerjaan" type="text" placeholder="Contoh: Ibu Rumah Tangga, PNS, Pedagang">
+          </div>
+          <div class="field">
+            <label>Penghasilan Ibu <span class="req">*</span></label>
+            <select id="f_ibu_penghasilan">
+              <option value="">— Pilih Rentang Penghasilan —</option>
+              <option>TIDAK BERPENGHASILAN</option>
+              <option>KURANG DARI 500.000</option>
+              <option>500.000 – 999.000</option>
+              <option>1.000.000 – 1.999.999</option>
+              <option>2.000.000 – 4.999.999</option>
+              <option>5.000.000 – 20.000.000</option>
+              <option>LEBIH DARI 20.000.000</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nomor WA Ibu</label>
+            <input id="f_ibu_wa" type="tel" placeholder="08xxxxxxxxxx">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="btn btn-prev" onclick="goStep(2)">← Kembali</button>
+    <button class="btn btn-next" onclick="goStep(4)">Lanjut: Data Wali →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ STEP 4: DATA WALI ═══════════════════════════════════ -->
+<div class="step-page" id="step-4">
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">🧑‍🤝‍🧑</div>
+      <h2>Data Wali</h2>
+    </div>
+    <div class="card-body">
+
+      <div class="field" style="margin-bottom:20px;">
+        <label>F.1. Keadaan Wali <span class="req">*</span></label>
+        <div class="radio-group">
+          <label class="radio-item"><input type="radio" name="wali_status" value="ada" onchange="toggleKondisi('wali','ada')"> Ada</label>
+          <label class="radio-item"><input type="radio" name="wali_status" value="tidak" onchange="toggleKondisi('wali','tidak')"> Tidak Ada</label>
+        </div>
+      </div>
+
+      <div id="data-wali-siswa" class="conditional">
+        <div class="section-divider"><span>Data Wali Siswa</span></div>
+        <div class="fields-grid">
+          <div class="field field-full">
+            <label>Nama Wali <span class="req">*</span></label>
+            <input id="f_wali_nama" type="text" placeholder="Nama lengkap wali">
+          </div>
+          <div class="field">
+            <label>NIK Wali <span class="req">*</span></label>
+            <input id="f_wali_nik" type="text" placeholder="3400000000000000" maxlength="16" oninput="this.value=this.value.replace(/\D/g,'')">
+          </div>
+          <div class="field">
+            <label>Tahun Lahir Wali <span class="req">*</span></label>
+            <input id="f_wali_thn_lahir" type="text" placeholder="1975" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')">
+          </div>
+          <div class="field">
+            <label>Pendidikan Wali <span class="req">*</span></label>
+            <select id="f_wali_pendidikan">
+              <option value="">— Pilih Pendidikan —</option>
+              <option>TIDAK/BELUM SEKOLAH</option>
+              <option>TIDAK TAMAT SD</option>
+              <option>SD/SEDERAJAT</option>
+              <option>SMP/SEDERAJAT</option>
+              <option>SMA/SEDERAJAT</option>
+              <option>D-1</option><option>D-2</option><option>D-3</option>
+              <option>D-4/S-1</option><option>S-2</option><option>S-3</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Pekerjaan Wali <span class="req">*</span></label>
+            <input id="f_wali_pekerjaan" type="text" placeholder="Pekerjaan wali">
+          </div>
+          <div class="field">
+            <label>Penghasilan Wali <span class="req">*</span></label>
+            <select id="f_wali_penghasilan">
+              <option value="">— Pilih Rentang Penghasilan —</option>
+              <option>TIDAK BERPENGHASILAN</option>
+              <option>KURANG DARI 500.000</option>
+              <option>500.000 – 999.000</option>
+              <option>1.000.000 – 1.999.999</option>
+              <option>2.000.000 – 4.999.999</option>
+              <option>5.000.000 – 20.000.000</option>
+              <option>LEBIH DARI 20.000.000</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nomor WA Wali</label>
+            <input id="f_wali_wa" type="tel" placeholder="08xxxxxxxxxx">
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="nav-buttons">
+    <button class="btn btn-prev" onclick="goStep(3)">← Kembali</button>
+    <button class="btn btn-next" onclick="goStep(5)">Lanjut: Pernyataan →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ STEP 5: PERNYATAAN + SUBMIT ═══════════════════════════════════ -->
+<div class="step-page" id="step-5">
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">📜</div>
+      <h2>Surat Pernyataan</h2>
+    </div>
+    <div class="card-body">
+      <div class="pernyataan-box">
+        Saya, Orang Tua/Wali Calon Peserta Didik, menyatakan dengan sesungguhnya bahwa Seluruh isian pendaftaran yang disampaikan adalah benar sesuai dengan keterangan yang tercantum dalam dokumen yang digunakan. Jika dokumen yang disampaikan ternyata suatu saat terbukti palsu atau keterangan yang disampaikan tidak sesuai dengan ketentuan yang dipersyaratkan, maka saya bersedia diproses sesuai dengan ketentuan yang berlaku dan menerima pembatalan atas penetapan diterimanya anak saya sebagai peserta didik baru.
+      </div>
+      <label class="checkbox-wrap" style="margin-top:18px;">
+        <input type="checkbox" id="chk-setuju">
+        <span>Saya menyatakan bahwa seluruh data yang diisikan adalah <strong>benar dan dapat dipertanggungjawabkan</strong>, serta saya menyetujui pernyataan di atas.</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="nav-buttons">
+    <button class="btn btn-prev" onclick="goStep(4)">← Kembali</button>
+    <button class="btn btn-submit" onclick="submitForm()">✅ Daftarkan Sekarang</button>
+  </div>
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div id="success-screen" class="card">
+  <div class="card-body">
+    <div class="success-icon">🎉</div>
+    <h2>Pendaftaran Berhasil!</h2>
+    <p>Formulir SPMB Anda telah berhasil dikirim. Harap catat nomor pendaftaran berikut dan tunjukkan saat verifikasi berkas.</p>
+    <div class="no-reg-box" id="no-registrasi">SPMB-2026-XXXXX</div>
+    <br><br>
+    <div class="info-box gold" style="text-align:left; max-width:500px; margin:0 auto;">
+      📌 Jadwal verifikasi berkas akan diumumkan melalui website resmi sekolah. Pastikan nomor WhatsApp yang didaftarkan aktif untuk menerima informasi lebih lanjut.
+    </div>
+  </div>
+</div>
+
+</div><!-- .main-wrap -->
+
+<script>
+  let currentStep = 0;
+
+  function goStep(n) {
+    document.getElementById('step-' + currentStep).classList.remove('active');
+    document.getElementById('tab-' + currentStep).classList.remove('active');
+    document.getElementById('tab-' + currentStep).classList.add('done');
+
+    currentStep = n;
+
+    document.getElementById('step-' + n).classList.add('active');
+    document.getElementById('tab-' + n).classList.add('active');
+    document.getElementById('tab-' + n).classList.remove('done');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function pilihJalur(jalur, el) {
+    document.querySelectorAll('.jalur-card').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+
+    // hide all conditional
+    ['domisili-section','mutasi-section','afirmasi-section','prestasi-section',
+     'upload-domisili','upload-mutasi','upload-afirmasi','upload-prestasi'].forEach(id => {
+       document.getElementById(id).classList.remove('show');
+     });
+
+    document.getElementById(jalur + '-section').classList.add('show');
+    document.getElementById('upload-' + jalur).classList.add('show');
+
+    // Inisialisasi peta saat jalur domisili dipilih
+    if (jalur === 'domisili') {
+      setTimeout(() => {
+        initSpmbMap();
+        if (spmbMap) spmbMap.invalidateSize();
+      }, 150);
+    }
+  }
+
+  function togglePrestasi(section, val) {
+    const map = {
+      rapor: 'data-rapor',
+      tka: 'data-tka',
+      kepanduan: 'data-kepanduan',
+      akademik: 'data-akademik',
+      nonakademik: 'data-nonakademik'
+    };
+    const el = document.getElementById(map[section]);
+    if (el) el.classList.toggle('show', val === 'ada');
+  }
+
+  let akademikCount = 1;
+  function tambahAkademik() {
+    akademikCount++;
+    const container = document.getElementById('akademik-entries');
+    const html = `
+      <div class="akademik-entry" style="border:1.5px solid var(--gray-line);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+        <div style="font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:14px;">Prestasi Akademik #${akademikCount}</div>
+        <div class="fields-grid">
+          <div class="field"><label>Tingkat Kejuaraan/Perlombaan <span class="req">*</span></label>
+            <select><option value="">— Pilih Tingkat —</option><option>INTERNASIONAL</option><option>NASIONAL</option><option>REGIONAL/WILAYAH</option><option>PROVINSI</option><option>KABUPATEN</option></select></div>
+          <div class="field"><label>Nama Kejuaraan/Lomba <span class="req">*</span></label>
+            <select><option value="">— Pilih Nama —</option><option>OSN</option><option>LPIR</option><option>OPSI</option></select></div>
+          <div class="field"><label>Jenis Kejuaraan/Perlombaan <span class="req">*</span></label>
+            <select><option value="">— Pilih Jenis —</option><option>PERORANGAN</option><option>BEREGU (2 s.d. 11)</option><option>MASSAL (12 Orang atau lebih)</option></select></div>
+          <div class="field"><label>Kejuaraan yang Diraih <span class="req">*</span></label>
+            <select><option value="">— Pilih Juara —</option><option>Juara 1</option><option>Juara 2</option><option>Juara 3</option></select></div>
+          <div class="field field-full"><label>Upload Bukti Kejuaraan <span class="req">*</span></label>
+            <div class="upload-area"><input id="file_akademik_${akademikCount}" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+              <div class="up-icon">🥇</div><div class="up-label">Klik untuk upload</div>
+              <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div><div class="up-filename"></div></div></div>
+        </div>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', html);
+    document.getElementById('hapus-akademik-btn').style.display = 'inline-flex';
+  }
+  function hapusAkademik() {
+    const container = document.getElementById('akademik-entries');
+    const entries = container.querySelectorAll('.akademik-entry');
+    if (entries.length > 1) { entries[entries.length-1].remove(); akademikCount--; }
+    if (akademikCount <= 1) document.getElementById('hapus-akademik-btn').style.display = 'none';
+  }
+
+  let nonAkademikCount = 1;
+  function tambahNonAkademik() {
+    nonAkademikCount++;
+    const container = document.getElementById('nonakademik-entries');
+    const html = `
+      <div class="nonakademik-entry" style="border:1.5px solid var(--gray-line);border-radius:var(--radius);padding:20px;margin-bottom:16px;">
+        <div style="font-weight:700;font-size:.85rem;color:var(--navy);margin-bottom:14px;">Prestasi Non-Akademik #${nonAkademikCount}</div>
+        <div class="fields-grid">
+          <div class="field"><label>Tingkat Kejuaraan/Perlombaan <span class="req">*</span></label>
+            <select><option value="">— Pilih Tingkat —</option><option>INTERNASIONAL</option><option>NASIONAL</option><option>REGIONAL/WILAYAH</option><option>PROVINSI</option><option>KABUPATEN</option></select></div>
+          <div class="field"><label>Nama Kejuaraan/Lomba <span class="req">*</span></label>
+            <select><option value="">— Pilih Nama —</option><option>OSN</option><option>LPIR</option><option>OPSI</option></select></div>
+          <div class="field"><label>Jenis Kejuaraan/Perlombaan <span class="req">*</span></label>
+            <select><option value="">— Pilih Jenis —</option><option>PERORANGAN</option><option>BEREGU (2 s.d. 11)</option><option>MASSAL (12 Orang atau lebih)</option></select></div>
+          <div class="field"><label>Kejuaraan yang Diraih <span class="req">*</span></label>
+            <select><option value="">— Pilih Juara —</option><option>Juara 1</option><option>Juara 2</option><option>Juara 3</option></select></div>
+          <div class="field field-full"><label>Upload Bukti Kejuaraan <span class="req">*</span></label>
+            <div class="upload-area"><input id="file_nonakademik_${nonAkademikCount}" type="file" accept=".jpg,.jpeg,.png,.pdf" onchange="showFile(this)">
+              <div class="up-icon">🏅</div><div class="up-label">Klik untuk upload</div>
+              <div class="up-hint">JPG / PNG / PDF, maks 2 MB</div><div class="up-filename"></div></div></div>
+        </div>
+      </div>`;
+    container.insertAdjacentHTML('beforeend', html);
+    document.getElementById('hapus-nonakademik-btn').style.display = 'inline-flex';
+  }
+  function hapusNonAkademik() {
+    const container = document.getElementById('nonakademik-entries');
+    const entries = container.querySelectorAll('.nonakademik-entry');
+    if (entries.length > 1) { entries[entries.length-1].remove(); nonAkademikCount--; }
+    if (nonAkademikCount <= 1) document.getElementById('hapus-nonakademik-btn').style.display = 'none';
+  }
+
+  function toggleKondisi(who, val) {
+    if (who === 'ayah') {
+      const el = document.getElementById('data-ayah-kandung');
+      el.classList.toggle('show', val === 'hidup');
+    } else if (who === 'ibu') {
+      const el = document.getElementById('data-ibu-kandung');
+      el.classList.toggle('show', val === 'hidup');
+    } else if (who === 'wali') {
+      const el = document.getElementById('data-wali-siswa');
+      el.classList.toggle('show', val === 'ada');
+    }
+  }
+
+  function showFile(input) {
+    const box = input.closest('.upload-area');
+    const fn = box.querySelector('.up-filename');
+    if (input.files && input.files[0]) {
+      fn.textContent = '✅ ' + input.files[0].name;
+      fn.style.display = 'block';
+      box.style.borderColor = 'var(--green)';
+      box.style.background = '#f0faf4';
+    }
+  }
+
+  // ── CONFIG GOOGLE SHEETS ──────────────────────────────────
+  // Ganti nilai GAS_URL di bawah dengan URL dari Apps Script setelah deploy
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbxpwmGJu4P73dH1Zrcsm1-dAqhG0fqmaXKSVG3kWVGX7YK5aoPIRnmLv8WGsQOiwLX0/exec';
+
+  function gVal(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim() : '';
+  }
+  function gRadio(name) {
+    const r = document.querySelector(`input[name="${name}"]:checked`);
+    return r ? r.value : '';
+  }
+
+  // ── HELPER: Baca file sebagai Base64 ──────────────────────
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      if (!file) return resolve(null);
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── HELPER: Encode satu file ke parameter payload ─────────
+  async function encodeFile(payload, key, inputId) {
+    const el = document.getElementById(inputId);
+    const file = el && el.files && el.files[0] ? el.files[0] : null;
+    if (!file) return;
+    payload['file_'     + key] = await fileToBase64(file);
+    payload['filename_' + key] = file.name;
+    payload['mime_'     + key] = file.type;
+  }
+
+  async function submitForm() {
+    const chk = document.getElementById('chk-setuju');
+    if (!chk.checked) {
+      alert('Mohon centang pernyataan persetujuan terlebih dahulu.');
+      return;
+    }
+
+    // Cek jalur yang dipilih
+    const jalurEl = document.querySelector('.jalur-card.selected .jalur-label');
+    const jalur = jalurEl ? jalurEl.textContent.trim() : '';
+    if (!jalur) { alert('Mohon pilih jalur pendaftaran terlebih dahulu.'); return; }
+
+    // Ambil semua data teks
+    const data = {
+      waktu_daftar   : new Date().toLocaleString('id-ID'),
+      jalur          : jalur,
+      // Data Diri
+      nama           : gVal('f_nama'),
+      jenis_kelamin  : gRadio('jk'),
+      nisn           : gVal('f_nisn'),
+      no_kk          : gVal('f_no_kk'),
+      nik            : gVal('f_nik'),
+      tempat_lahir   : gVal('f_tempat_lahir'),
+      tgl_lahir      : gVal('f_tgl_lahir'),
+      wa             : gVal('f_wa'),
+      agama          : gVal('f_agama'),
+      hobi           : gVal('f_hobi'),
+      cita_cita      : gVal('f_cita'),
+      pra_sekolah    : gRadio('pra_sekolah'),
+      tinggi         : gVal('f_tinggi'),
+      berat          : gVal('f_berat'),
+      jarak_rmh      : gRadio('jarak_rmh'),
+      waktu_tempuh   : gVal('f_waktu_tempuh'),
+      jml_saudara    : gVal('f_jml_saudara'),
+      // Ayah
+      ayah_status    : gRadio('ayah_status'),
+      ayah_nama      : gVal('f_ayah_nama'),
+      ayah_nik       : gVal('f_ayah_nik'),
+      ayah_thn_lahir : gVal('f_ayah_thn_lahir'),
+      ayah_pendidikan: gVal('f_ayah_pendidikan'),
+      ayah_pekerjaan : gVal('f_ayah_pekerjaan'),
+      ayah_penghasilan:gVal('f_ayah_penghasilan'),
+      ayah_wa        : gVal('f_ayah_wa'),
+      // Ibu
+      ibu_status     : gRadio('ibu_status'),
+      ibu_nama       : gVal('f_ibu_nama'),
+      ibu_nik        : gVal('f_ibu_nik'),
+      ibu_thn_lahir  : gVal('f_ibu_thn_lahir'),
+      ibu_pendidikan : gVal('f_ibu_pendidikan'),
+      ibu_pekerjaan  : gVal('f_ibu_pekerjaan'),
+      ibu_penghasilan: gVal('f_ibu_penghasilan'),
+      ibu_wa         : gVal('f_ibu_wa'),
+      // Wali
+      wali_status    : gRadio('wali_status'),
+      wali_nama      : gVal('f_wali_nama'),
+      wali_nik       : gVal('f_wali_nik'),
+      wali_thn_lahir : gVal('f_wali_thn_lahir'),
+      wali_pendidikan: gVal('f_wali_pendidikan'),
+      wali_pekerjaan : gVal('f_wali_pekerjaan'),
+      wali_penghasilan:gVal('f_wali_penghasilan'),
+      wali_wa        : gVal('f_wali_wa'),
+      // Peta (domisili)
+      lat_rumah      : spmbHomeLat !== null ? spmbHomeLat.toFixed(6) : '',
+      lng_rumah      : spmbHomeLng !== null ? spmbHomeLng.toFixed(6) : '',
+      jarak_meter    : document.getElementById('spmb-dist-val') ? document.getElementById('spmb-dist-val').textContent : '',
+      zona_jarak     : document.getElementById('spmb-dist-zone') ? document.getElementById('spmb-dist-zone').textContent.replace(/[^\w\s]/g,'').trim() : '',
+    };
+
+    // Validasi minimal
+    if (!data.nama) { alert('Nama lengkap wajib diisi di langkah Data Diri.'); return; }
+    if (!data.nisn)  { alert('NISN wajib diisi di langkah Data Diri.'); return; }
+
+    // Generate nomor registrasi
+    const noReg = 'SPMB-2026-' + Math.floor(10000 + Math.random() * 90000);
+    data.no_registrasi = noReg;
+
+    // Tampilkan loading state
+    const btn = document.querySelector('.btn-submit');
+    const origText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Mengupload dokumen...';
+
+    try {
+      // ── Encode semua file ke Base64 ──────────────────────────
+      // Dokumen wajib
+      await encodeFile(data, 'kk',       'file_kk');
+      await encodeFile(data, 'akta',     'file_akta');
+      await encodeFile(data, 'ijazah',   'file_ijazah');
+      await encodeFile(data, 'foto',     'file_foto');
+      // Dokumen kondisional jalur
+      await encodeFile(data, 'domisili', 'file_domisili');
+      await encodeFile(data, 'mutasi',   'file_mutasi');
+      await encodeFile(data, 'afirmasi', 'file_afirmasi');
+      // Prestasi: Rapor — Surat Keterangan Peringkat
+      await encodeFile(data, 'peringkat','file_peringkat');
+      // Prestasi: TKA
+      await encodeFile(data, 'tka',      'file_tka');
+      // Prestasi: Kepanduan Organisasi
+      await encodeFile(data, 'kepanduan','file_kepanduan');
+      // Prestasi: Bukti Kejuaraan Akademik (bisa lebih dari 1)
+      for (let i = 1; i <= akademikCount; i++) {
+        await encodeFile(data, 'akademik_' + i, 'file_akademik_' + i);
+      }
+      data.akademik_count = akademikCount;
+      // Prestasi: Bukti Kejuaraan Non-Akademik (bisa lebih dari 1)
+      for (let i = 1; i <= nonAkademikCount; i++) {
+        await encodeFile(data, 'nonakademik_' + i, 'file_nonakademik_' + i);
+      }
+      data.nonakademik_count = nonAkademikCount;
+
+      btn.innerHTML = '⏳ Mengirim data ke server...';
+
+      // ── Kirim via POST ke Google Apps Script ─────────────────
+      const res = await fetch(GAS_URL, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body   : new URLSearchParams(data).toString()
+      });
+
+      let json = {};
+      try { json = await res.json(); } catch(e) { /* no-cors fallback */ }
+
+      btn.disabled = false;
+      btn.innerHTML = origText;
+      tampilkanSukses(noReg);
+
+    } catch(err) {
+      console.error('Submit error:', err);
+      btn.disabled = false;
+      btn.innerHTML = origText;
+      alert('Terjadi kesalahan saat mengirim data. Pastikan koneksi internet stabil lalu coba lagi.\n\nDetail: ' + err.message);
+    }
+  }
+
+  function tampilkanSukses(noReg) {
+    document.getElementById('no-registrasi').textContent = noReg;
+    document.getElementById('step-5').style.display = 'none';
+    document.getElementById('success-screen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Highlight radio items on click
+  document.addEventListener('change', e => {
+    if (e.target.type === 'radio') {
+      const name = e.target.name;
+      document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+        r.closest('.radio-item').classList.toggle('selected-radio', r.checked);
+      });
+    }
+  });
+
+  // ─── PETA DOMISILI (Leaflet) ───────────────────────────
+  const SEKOLAH_POS = { lat: -1.844700, lng: 109.976300 };
+  let spmbMap = null, spmbHomeMarker = null, spmbLine = null;
+  let spmbHomeLat = null, spmbHomeLng = null;
+
+  function initSpmbMap() {
+    if (spmbMap) return; // sudah diinit
+    spmbMap = L.map('spmb-map').setView([SEKOLAH_POS.lat, SEKOLAH_POS.lng], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap', maxZoom: 19
+    }).addTo(spmbMap);
+
+    const iconSekolah = L.divIcon({
+      html: `<div style="background:#c0392b;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;"><div style="transform:rotate(45deg);font-size:16px;">🏫</div></div>`,
+      iconSize: [36,36], iconAnchor: [18,36], popupAnchor: [0,-38], className: ''
+    });
+    const iconRumah = L.divIcon({
+      html: `<div style="background:#1a7a4a;width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 3px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;"><div style="transform:rotate(45deg);font-size:15px;">🏠</div></div>`,
+      iconSize: [34,34], iconAnchor: [17,34], popupAnchor: [0,-36], className: ''
+    });
+
+    const sekolahMarker = L.marker([SEKOLAH_POS.lat, SEKOLAH_POS.lng], { icon: iconSekolah, draggable: true })
+      .addTo(spmbMap)
+      .bindPopup('<b>🏫 SMP Negeri 1 Ketapang</b><br><small>Jl. RM Sudiono No.42, Ketapang</small>');
+    sekolahMarker.on('dragend', function(e) {
+      const p = e.target.getLatLng();
+      SEKOLAH_POS.lat = p.lat; SEKOLAH_POS.lng = p.lng;
+      if (spmbHomeLat !== null) { spmbUpdateDistance(); spmbDrawLine(); }
+    });
+
+    spmbMap.on('click', function(e) {
+      spmbHomeLat = e.latlng.lat; spmbHomeLng = e.latlng.lng;
+      if (spmbHomeMarker) spmbMap.removeLayer(spmbHomeMarker);
+      spmbHomeMarker = L.marker([spmbHomeLat, spmbHomeLng], { icon: iconRumah })
+        .addTo(spmbMap).bindPopup('🏠 Lokasi Rumah').openPopup();
+      spmbUpdateDistance(); spmbDrawLine();
+    });
+  }
+
+  function spmbDrawLine() {
+    if (spmbLine) spmbMap.removeLayer(spmbLine);
+    spmbLine = L.polyline([[SEKOLAH_POS.lat, SEKOLAH_POS.lng],[spmbHomeLat, spmbHomeLng]], {
+      color: '#c8972a', weight: 2.5, dashArray: '7,6', opacity: .8
+    }).addTo(spmbMap);
+  }
+
+  function spmbHaversine(lat1, lng1, lat2, lng2) {
+    const R = 6371, dLat = (lat2-lat1)*Math.PI/180, dLng = (lng2-lng1)*Math.PI/180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLng/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function spmbUpdateDistance() {
+    const d = spmbHaversine(SEKOLAH_POS.lat, SEKOLAH_POS.lng, spmbHomeLat, spmbHomeLng);
+    const dm = Math.round(d * 1000);
+    const label = dm.toLocaleString('id-ID') + ' m';
+
+    const box = document.getElementById('spmb-distance-box');
+    box.classList.add('show');
+    document.getElementById('spmb-dist-val').textContent = label;
+    document.getElementById('spmb-coord-lat').textContent = spmbHomeLat.toFixed(6);
+    document.getElementById('spmb-coord-lng').textContent = spmbHomeLng.toFixed(6);
+    document.getElementById('spmb-coord-dist').textContent = label;
+    document.getElementById('spmb-coords-chips').style.display = 'flex';
+
+    const zoneEl = document.getElementById('spmb-dist-zone');
+    if (dm <= 1000) {
+      zoneEl.textContent = '🟢 Dekat'; zoneEl.className = 'dr-zone zone-dekat';
+    } else if (dm <= 2000) {
+      zoneEl.textContent = '🟡 Sedang'; zoneEl.className = 'dr-zone zone-sedang';
+    } else {
+      zoneEl.textContent = '🔴 Jauh'; zoneEl.className = 'dr-zone zone-jauh';
+    }
+  }
+
+</script>
+</body>
+</html>
